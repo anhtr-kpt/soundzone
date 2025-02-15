@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #ff9600;
+  --color-secondary: #c4c4c4;
+  --color-placeholder: #444444;
+  --font-nunito: Nunito, sans-serif;
+}
+
+@layer base {
+  body {
+    @apply text-sm antialiased bg-black;
+  }
+}
+
+@layer components {
+  .link {
+    @apply flex gap-2 text-[15px] py-2 px-8;
+  }
+
+  .primary-hover {
+    @apply hover:text-primary transition-colors duration-100;
+  }
+}
+
+@layer utilities {
+}
