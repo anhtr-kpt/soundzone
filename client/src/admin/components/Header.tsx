@@ -1,6 +1,7 @@
-import { Cast, Settings } from "lucide-react";
+import { Cast } from "lucide-react";
 import Searchbar from "./Searchbar";
 import { useEffect, useState } from "react";
+import Settings from "./Settings";
 
 const Header = () => {
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -27,18 +28,19 @@ const Header = () => {
   }, [lastScrollY]);
   return (
     <header
-      className={`bg-black fixed z-10 top-0 left-0 right-0 ml-56 py-4 px-8 flex gap-6 justify-between items-center transition-transform duration-300 ${
+      className={`fixed z-10 top-0 left-0 right-0 ml-56 py-4 px-8 flex gap-6 justify-between items-center transition-transform duration-300 ${
         show ? "translate-y-0" : "-translate-y-full"
-      } ${lastScrollY > 0 ? "border-b border-secondary/20" : ""}`}
+      } ${lastScrollY > 0 ? "border-b" : ""}`}
     >
       <Searchbar />
       <div className="flex items-center gap-8">
         <button type="button" className="primary-hover">
           <Cast strokeWidth={1.5} size={22} />
         </button>
-        <button type="button" className="primary-hover">
+        <Settings />
+        {/* <button type="button" className="primary-hover">
           <Settings strokeWidth={1.5} size={22} />
-        </button>
+        </button> */}
         <button type="button" className="primary-hover">
           <img
             src="../src/assets/avatar.jpeg"

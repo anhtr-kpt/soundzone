@@ -46,7 +46,7 @@ const NavigationBar = () => {
             key={path}
             className={`${
               location.pathname === path
-                ? "flex bg-gradient-to-r from-primary/40 to-20%"
+                ? "flex bg-gradient-to-r from-primary-foreground/40 to-20%"
                 : ""
             }`}
           >
@@ -54,8 +54,8 @@ const NavigationBar = () => {
               to={path}
               className={`border-l-2 primary-hover link ${
                 location.pathname === path
-                  ? "text-primary border-primary"
-                  : "border-black"
+                  ? "text-primary-foreground border-primary-foreground"
+                  : "border-background"
               }`}
             >
               {Icon && <Icon size={22} strokeWidth={1.5} />}

@@ -40,6 +40,7 @@ const artistSchema = new mongoose.Schema(
     },
     bannerUrl: {
       type: String,
+      required: [true, "Banner URL is required"],
       validate: {
         validator: function (v) {
           return !v || /^https?:\/\/.+/.test(v);
@@ -57,7 +58,7 @@ const artistSchema = new mongoose.Schema(
       default: 0,
       min: 0,
     },
-    verified: {
+    isVerified: {
       type: Boolean,
       required: true,
       default: false,
