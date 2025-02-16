@@ -24,6 +24,9 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { IUploadResponse } from "@/types";
+import { ImageUpload } from "../components/ImageUpload";
+import { useState } from "react";
 
 const formSchema = z.object({
   name: z.string().min(1, "Artist name is required").trim(),
@@ -33,9 +36,11 @@ const formSchema = z.object({
     .max(500, "Bio cannot exceed 500 characters")
     .trim(),
   avatarUrl: z
-    .string()
-    .min(1, "Avatar URL is required")
-    .regex(urlRegex, "Invalid avatar URL format"),
+    .object({
+      url: z.string(),
+      publicId: z.string(),
+    })
+    .nullable(),
   bannerUrl: z
     .string()
     .min(1, "Banner URL is required")
@@ -47,6 +52,8 @@ const formSchema = z.object({
 });
 
 const CreateArtist = () => {
+  const [error, setError] = useState<string>("");
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
@@ -133,7 +140,7 @@ const CreateArtist = () => {
               </FormItem>
             )}
           />
-          <FormField
+          {/* <FormField
             control={form.control}
             name="avatarUrl"
             render={({ field }) => (
@@ -150,6 +157,14 @@ const CreateArtist = () => {
                 </FormControl>
               </FormItem>
             )}
+          /> */}
+          <ImageUpload
+            onUploadComplete={(response: IUploadResponse) => {
+              form.setValue("avatarUrl", response);
+            }}
+            onUploadError={(error: Error) => {
+              setError(error.message);
+            }}
           />
           <FormField
             control={form.control}

@@ -41,3 +41,8 @@ export interface ILabel {
 }
 
 export const urlRegex = /^https?:\/\/.+/;
+
+export interface IUploadResponse {
+  url: string;
+  publicId: string;
+}
