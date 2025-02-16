@@ -2,15 +2,18 @@ import { useState } from "react";
 import { Progress } from "@/components/ui/progress";
 import { uploadToCloudinary } from "@/utils/cloudinary";
 import { IUploadResponse } from "@/types";
+import { Upload } from "lucide-react";
 
 interface ImageUploadProps {
   onUploadComplete: (response: IUploadResponse) => void;
   onUploadError: (error: Error) => void;
+  type: "avatar" | "banner";
 }
 
 export const ImageUpload = ({
   onUploadComplete,
   onUploadError,
+  type,
 }: ImageUploadProps) => {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -43,43 +46,44 @@ export const ImageUpload = ({
   };
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
+    <div className="space-y-4 mx-auto">
+      <div className="flex flex-col gap-4">
+        {preview &&
+          (type === "avatar" ? (
+            <div className="border border-neutral-200 dark:border-neutral-800 w-fit rounded-full">
+              <img
+                src={preview}
+                alt="Preview"
+                className="aspect-square size-64 rounded-full"
+              />
+            </div>
+          ) : (
+            <div className="border border-neutral-200 dark:border-neutral-800 w-full">
+              <img src={preview} alt="Preview" className="aspect-25/9 w-full" />
+            </div>
+          ))}
+        <div className="mx-auto">
           <input
             type="file"
             accept="image/*"
             onChange={handleFileChange}
             className="hidden"
-            id="image-upload"
+            id={`${type}-upload`}
           />
           <label
-            htmlFor="image-upload"
-            className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50"
+            htmlFor={`${type}-upload`}
+            className="rounded-md transition-colors h-9 inline-flex px-5 py-1 items-center justify-center gap-2 text-sm font-medium border border-neutral-200 bg-white hover:bg-neutral-100 hover:text-neutral-900 dark:border-neutral-800 dark:bg-neutral-950 dark:hover:bg-neutral-800 dark:hover:text-neutral-50"
           >
-            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-              <span className="text-sm text-gray-500">
-                Click to upload image
-              </span>
-            </div>
+            <Upload strokeWidth={1.5} size={18} />
+            <span className="">Upload {type}</span>
           </label>
         </div>
-
-        {preview && (
-          <div>
-            <img
-              src={preview}
-              alt="Preview"
-              className="object-cover w-full h-48 rounded-lg"
-            />
-          </div>
-        )}
       </div>
 
       {uploading && (
         <div className="space-y-2">
           <Progress value={progress} />
-          <p className="text-sm text-gray-500">Uploading... {progress}%</p>
+          <p className="text-sm">Uploading... {progress}%</p>
         </div>
       )}
     </div>

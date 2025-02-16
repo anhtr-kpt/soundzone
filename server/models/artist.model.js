@@ -2,9 +2,15 @@ import mongoose from "mongoose";
 
 const artistSchema = new mongoose.Schema(
   {
-    name: {
+    fullName: {
       type: String,
-      required: [true, "Artist name is required"],
+      required: [true, "Full name is required"],
+      trim: true,
+      index: true,
+    },
+    stageName: {
+      type: String,
+      required: [true, "Stage name is required"],
       trim: true,
       index: true,
     },
@@ -57,11 +63,6 @@ const artistSchema = new mongoose.Schema(
       type: Number,
       default: 0,
       min: 0,
-    },
-    isVerified: {
-      type: Boolean,
-      required: true,
-      default: false,
     },
   },
   {

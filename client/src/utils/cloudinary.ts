@@ -6,13 +6,11 @@ export const uploadToCloudinary = async (
   onProgress?: (progress: number) => void
 ): Promise<IUploadResponse> => {
   return new Promise((resolve, reject) => {
-    console.log(CLOUDINARY_CONFIG);
     const xhr = new XMLHttpRequest();
     const formData = new FormData();
 
     formData.append("file", file);
     formData.append("upload_preset", CLOUDINARY_CONFIG.uploadPreset as string);
-    formData.append("cloud_name", CLOUDINARY_CONFIG.cloudName as string);
 
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable && onProgress) {
