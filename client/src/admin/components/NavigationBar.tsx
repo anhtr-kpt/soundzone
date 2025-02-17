@@ -5,6 +5,7 @@ import {
   Database,
   Users,
   LayoutDashboard,
+  Tags,
 } from "lucide-react";
 
 const NavigationBar = () => {
@@ -25,6 +26,11 @@ const NavigationBar = () => {
       title: "Artists",
       path: "/admin/artists",
       icon: UsersRound,
+    },
+    {
+      title: "Genres",
+      path: "/admin/genres",
+      icon: Tags,
     },
     {
       title: "Albums",

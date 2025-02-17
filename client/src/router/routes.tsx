@@ -11,6 +11,8 @@ const AdminSongDetail = lazy(() => import("@/admin/pages/SongDetail"));
 const AdminCreateSong = lazy(() => import("@/admin/pages/CreateSong"));
 const AdminArtistDetail = lazy(() => import("@/admin/pages/ArtistDetail"));
 const AdminCreateArtist = lazy(() => import("@/admin/pages/CreateArtist"));
+const AdminGenres = lazy(() => import("@/admin/pages/Genres"));
+const AdminCreateGenre = lazy(() => import("@/admin/pages/CreateGenre"));
 
 const UserDashboard = lazy(() => import("@/user/pages/Dashboard"));
 const UserSongs = lazy(() => import("@/user/pages/Songs"));
@@ -66,6 +68,22 @@ export const adminRoutes: RouteObject[] = [
     element: (
       <Suspense fallback={<LoadingSpinner />}>
         <AdminArtists />
+      </Suspense>
+    ),
+  },
+  {
+    path: "genres",
+    element: (
+      <Suspense fallback={<LoadingSpinner />}>
+        <AdminGenres />
+      </Suspense>
+    ),
+  },
+  {
+    path: "genres/create-genre",
+    element: (
+      <Suspense fallback={<LoadingSpinner />}>
+        <AdminCreateGenre />
       </Suspense>
     ),
   },

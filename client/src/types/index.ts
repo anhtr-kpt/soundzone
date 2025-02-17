@@ -41,6 +41,7 @@ export interface ILabel {
 }
 
 export const urlRegex = /^https?:\/\/.+/;
+export const colorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
 
 export interface IUploadResponse {
   url: string;

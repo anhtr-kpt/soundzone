@@ -25,6 +25,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { IUploadResponse } from "@/types";
 import { ImageUpload } from "../components/ImageUpload";
 import { useState } from "react";
+import { useCreateArtist } from "@/hooks/useArtists";
 
 const formSchema = z.object({
   fullName: z.string().min(1, "Full name is required").trim(),
@@ -61,6 +62,10 @@ const formSchema = z.object({
 const CreateArtist = () => {
   const [error, setError] = useState<string>("");
 
+  // const { data: artists, isLoading, error } = useArtists();
+
+  const createArtist = useCreateArtist();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
@@ -74,6 +79,16 @@ const CreateArtist = () => {
       <h3 className="capitalize text-2xl font-semibold text-center mb-8">
         Create new artist
       </h3>
+      <button
+        onClick={() =>
+          createArtist.mutate({
+            name: "New User",
+            email: "new@example.com",
+          })
+        }
+      >
+        Add User
+      </button>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-4 lg:space-y-0 lg:flex lg:[&_div]:flex-1 lg:space-x-4">
