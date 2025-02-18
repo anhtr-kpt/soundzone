@@ -1,10 +1,12 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { adminRoutes, userRoutes } from "./routes";
+import { adminRoutes, userRoutes, adminAuthRoutes } from "./routes";
 import { ProtectedRoute } from "./ProtectedRoute";
 import AdminLayout from "@/layouts/AdminLayout";
 
 const router = createBrowserRouter([
   ...userRoutes,
+  ...adminAuthRoutes,
+
   {
     path: "/admin/*",
     element: (

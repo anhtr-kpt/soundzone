@@ -13,6 +13,7 @@ const AdminArtistDetail = lazy(() => import("@/admin/pages/ArtistDetail"));
 const AdminCreateArtist = lazy(() => import("@/admin/pages/CreateArtist"));
 const AdminGenres = lazy(() => import("@/admin/pages/Genres"));
 const AdminCreateGenre = lazy(() => import("@/admin/pages/CreateGenre"));
+const AdminLogin = lazy(() => import("@/admin/pages/Login"));
 
 const UserDashboard = lazy(() => import("@/user/pages/Dashboard"));
 const UserSongs = lazy(() => import("@/user/pages/Songs"));
@@ -108,6 +109,17 @@ export const adminRoutes: RouteObject[] = [
     element: (
       <Suspense fallback={<LoadingSpinner />}>
         <AdminPlaylists />
+      </Suspense>
+    ),
+  },
+];
+
+export const adminAuthRoutes: RouteObject[] = [
+  {
+    path: "admin/login",
+    element: (
+      <Suspense fallback={<LoadingSpinner />}>
+        <AdminLogin />
       </Suspense>
     ),
   },
