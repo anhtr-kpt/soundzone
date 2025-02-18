@@ -47,3 +47,11 @@ export interface IUploadResponse {
   url: string;
   publicId: string;
 }
+
+export interface IUser {
+  _id: string;
+  email: string;
+  name: string;
+  role: "admin" | "user";
+  avatar?: string;
+}

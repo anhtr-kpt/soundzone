@@ -12,7 +12,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const formSchema = z.object({
   email: z
@@ -23,12 +24,20 @@ const formSchema = z.object({
 });
 
 const Login = () => {
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+    try {
+      login(values.email, values.password);
+      // navigate("/admin");
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   return (
@@ -61,6 +70,7 @@ const Login = () => {
                   <FormLabel required>Password</FormLabel>
                   <FormControl>
                     <Input
+                      type="password"
                       placeholder="Password"
                       {...field}
                       className="text-sm"
