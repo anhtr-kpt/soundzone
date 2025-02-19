@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { ClipLoader } from "react-spinners";
 
 const formSchema = z.object({
   email: z
@@ -24,7 +25,7 @@ const formSchema = z.object({
 });
 
 const Login = () => {
-  const { login } = useAuth();
+  const { login, isLoading } = useAuth();
   const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -90,7 +91,7 @@ const Login = () => {
             </div>
             <div className="w-full flex justify-center mt-6">
               <Button type="submit" size="lg">
-                Login
+                {isLoading ? <ClipLoader size={20} /> : "Login"}
               </Button>
             </div>
           </form>

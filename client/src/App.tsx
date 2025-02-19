@@ -1,14 +1,15 @@
-import { AuthProvider } from "./contexts/AuthContext";
+import { Provider } from "react-redux";
 import { AppRouter } from "./router";
 import { ThemeProvider } from "@/components/theme-provider";
+import store from "./store";
 
 function App() {
   return (
-    <AuthProvider>
+    <Provider store={store}>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <AppRouter />
       </ThemeProvider>
-    </AuthProvider>
+    </Provider>
   );
 }
 

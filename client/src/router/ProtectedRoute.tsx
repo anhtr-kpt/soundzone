@@ -1,15 +1,13 @@
 import { Navigate } from "react-router-dom";
 import { ProtectedRouteProps } from "./types";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAppDispatch, useAppSelector } from "@/store";
 
-export const ProtectedRoute = ({
-  isAuthenticated,
-  authenticationPath,
-  outlet,
-}: ProtectedRouteProps) => {
-  const { user } = useAuth();
-  if (user) {
-    return outlet;
+export const ProtectedRoute = ({ outlet }: ProtectedRouteProps) => {
+  const { user } = useAppSelector((state) => state.auth);
+
+  if (!user) {
+    return <Navigate to="/" />;
   }
-  return <Navigate to={{ pathname: authenticationPath }} />;
+
+  if (user.role === "admin") return outlet;
 };

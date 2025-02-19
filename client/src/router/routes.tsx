@@ -114,9 +114,9 @@ export const adminRoutes: RouteObject[] = [
   },
 ];
 
-export const adminAuthRoutes: RouteObject[] = [
+export const authRoutes: RouteObject[] = [
   {
-    path: "admin/login",
+    path: "/login",
     element: (
       <Suspense fallback={<LoadingSpinner />}>
         <AdminLogin />
