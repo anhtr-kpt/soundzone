@@ -1,26 +1,40 @@
-import jwt from "jsonwebtoken";
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction, RequestHandler } from "express";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { UserRole } from "@/models/user.model";
 
-export const auth = (roles: UserRole[] = []) => {
-  return async (req: Request, res: Response, next: NextFunction) => {
+interface TokenPayload extends JwtPayload {
+  id?: string;
+  role?: string;
+}
+
+export const auth = (roles: UserRole[] = []): RequestHandler => {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    const authHeader = req.header("Authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      res.status(401).json({
+        success: false,
+        message: "Please authenticate",
+      });
+      return;
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+
     try {
-      const token = req.header("Authorization")?.replace("Bearer ", "");
-
-      if (!token) {
-        throw new Error();
-      }
-
       const decoded = jwt.verify(
         token,
         process.env.JWT_SECRET as string
-      ) as any;
+      ) as TokenPayload;
 
-      if (roles.length && !roles.includes(decoded.role)) {
-        return res.status(403).json({
+      if (
+        roles.length &&
+        (!decoded.role || !roles.includes(decoded.role as UserRole))
+      ) {
+        res.status(403).json({
           success: false,
           message: "Access denied",
         });
+        return;
       }
 
       (req as any).user = decoded;
@@ -30,6 +44,7 @@ export const auth = (roles: UserRole[] = []) => {
         success: false,
         message: "Please authenticate",
       });
+      return;
     }
   };
 };

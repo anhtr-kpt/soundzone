@@ -1,13 +1,25 @@
 import { Navigate } from "react-router-dom";
-import { ProtectedRouteProps } from "./types";
-import { useAppDispatch, useAppSelector } from "@/store";
+import { IProtectedRouteProps } from "./types";
+import { useAppSelector } from "@/store";
+import LoadingSpinner from "@/common/components/LoadingSpinner";
 
-export const ProtectedRoute = ({ outlet }: ProtectedRouteProps) => {
-  const { user } = useAppSelector((state) => state.auth);
+export const ProtectedRoute = ({
+  children,
+  requiredRole,
+}: IProtectedRouteProps) => {
+  const { user, isLoading } = useAppSelector((state) => state.auth);
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
 
   if (!user) {
+    return <Navigate to="/login" />;
+  }
+
+  if (requiredRole && user.role !== requiredRole) {
     return <Navigate to="/" />;
   }
 
-  if (user.role === "admin") return outlet;
+  return children;
 };

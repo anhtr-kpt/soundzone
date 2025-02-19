@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import User, { UserRole } from "@/models/user.model";
 import jwt from "jsonwebtoken";
 import { Types } from "mongoose";
@@ -15,6 +15,29 @@ interface ILoginInput {
 }
 
 class UserController {
+  public async getCurrentUser(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<any> {
+    try {
+      const userId = (req as any).user?.id;
+
+      if (!userId) {
+        return res
+          .status(401)
+          .json({ success: false, message: "Unauthorized" });
+      }
+
+      const user = await User.findById(userId).select("-password");
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.status(200).json({ success: true, data: { user } });
+    } catch (error) {
+      console.error(error);
+    }
+  }
   public async register(req: Request, res: Response): Promise<any> {
     try {
       const { email, password, name }: IRegisterUserInput = req.body;

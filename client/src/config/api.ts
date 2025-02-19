@@ -35,7 +35,7 @@ api.interceptors.response.use(
           refreshToken,
         });
         const { authToken, refreshToken: newRefreshToken } =
-          response.data.data.tokens;
+          response.data.tokens;
         localStorage.setItem("authToken", authToken);
         localStorage.setItem("refreshToken", newRefreshToken);
         axios.defaults.headers.common["Authorization"] = `Bearer ${authToken}`;

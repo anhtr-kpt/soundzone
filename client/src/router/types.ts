@@ -1,7 +1,4 @@
-import { JSX } from "react";
-
-export interface ProtectedRouteProps {
-  isAuthenticated: boolean;
-  authenticationPath: string;
-  outlet: JSX.Element;
+export interface IProtectedRouteProps {
+  children: React.ReactElement;
+  requiredRole?: "admin" | "user";
 }

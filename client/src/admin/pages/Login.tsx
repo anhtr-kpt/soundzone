@@ -13,8 +13,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
 import { ClipLoader } from "react-spinners";
+import { useAppDispatch, useAppSelector } from "@/store";
+import { login } from "@/store/slices/authSlice";
+import { useEffect } from "react";
 
 const formSchema = z.object({
   email: z
@@ -25,7 +27,8 @@ const formSchema = z.object({
 });
 
 const Login = () => {
-  const { login, isLoading } = useAuth();
+  const { user, isLoading } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -34,12 +37,17 @@ const Login = () => {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      login(values.email, values.password);
-      // navigate("/admin");
+      dispatch(login({ email: values.email, password: values.password }));
     } catch (error) {
       console.error(error);
     }
   }
+
+  useEffect(() => {
+    if (user) {
+      navigate("/admin");
+    }
+  }, [user, navigate]);
 
   return (
     <div className="w-full min-h-screen relative">

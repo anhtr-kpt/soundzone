@@ -21,8 +21,8 @@ export const checkAuth = createAsyncThunk<IUser | null>(
     if (token) {
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       try {
-        const response = await api.get("/api/users/me");
-        return response.data.data.user as IUser;
+        const response = await api.get("/users/me");
+        return response.data.user as IUser;
       } catch (error: any) {
         localStorage.removeItem("authToken");
         localStorage.removeItem("refreshToken");
@@ -45,7 +45,7 @@ export const login = createAsyncThunk<
       password,
     });
 
-    const { user, tokens } = response.data.data;
+    const { user, tokens } = response.data;
     localStorage.setItem("authToken", tokens.authToken);
     localStorage.setItem("refreshToken", tokens.refreshToken);
     api.defaults.headers.common["Authorization"] = `Bearer ${tokens.authToken}`;
@@ -60,12 +60,12 @@ export const register = createAsyncThunk<
   { email: string; password: string; name: string }
 >("auth/register", async ({ email, password, name }, thunkAPI) => {
   try {
-    const response = await api.post("/api/users/register", {
+    const response = await api.post("/users/register", {
       email,
       password,
       name,
     });
-    const { user, tokens } = response.data.data;
+    const { user, tokens } = response.data;
     localStorage.setItem("authToken", tokens.authToken);
     localStorage.setItem("refreshToken", tokens.refreshToken);
     api.defaults.headers.common["Authorization"] = `Bearer ${tokens.authToken}`;
@@ -77,7 +77,7 @@ export const register = createAsyncThunk<
 
 export const logout = createAsyncThunk("auth/logout", async (_, thunkAPI) => {
   try {
-    await api.post("/api/users/logout");
+    await api.post("/users/logout");
   } catch (error) {
     console.error("Logout error:", error);
   } finally {
