@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
 import { ClipLoader } from "react-spinners";
 import { useAppDispatch, useAppSelector } from "@/store";
-import { login } from "@/store/slices/authSlice";
+import { login } from "@/store/slices/userSlice";
 import { useEffect } from "react";
 
 const formSchema = z.object({

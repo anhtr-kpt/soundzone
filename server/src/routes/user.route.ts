@@ -1,16 +1,23 @@
-import express from "express";
-import userController from "@/controllers/user.controller";
-import { auth } from "middlewares/auth";
+// src/routes/user.routes.ts
+import { Router } from "express";
+import {
+  signup,
+  login,
+  checkAuth,
+  logout,
+  createAdmin,
+  // forgotPassword,
+} from "@/controllers/user.controller";
+import { protect } from "@/middlewares/auth.middleware";
 
-const router = express.Router();
+const router = Router();
 
-router.post("/login", userController.login);
-router.post("/register", userController.register);
-router.post("/logout", auth(), userController.logout);
-router.post("/create-admin-account", userController.createAdmin);
-router.get("/me", auth(), userController.getCurrentUser);
-// router.get("/admin-only", auth([UserRole.ADMIN]), (req, res) => {
-//   res.status(200).json({ message: "Admin access granted" });
-// });
+router.post("/signup", signup);
+router.post("/login", login);
+router.post("/create-admin", createAdmin);
+// router.post("/forgot-password", forgotPassword);
+
+router.get("/me", protect, checkAuth);
+router.post("/logout", protect, logout);
 
 export default router;

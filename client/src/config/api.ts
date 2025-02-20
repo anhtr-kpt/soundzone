@@ -1,5 +1,5 @@
 import store from "@/store";
-import { logout } from "@/store/slices/authSlice";
+import { logout } from "@/store/slices/userSlice";
 import axios from "axios";
 
 export const API_URL =
@@ -24,7 +24,7 @@ api.interceptors.request.use(
 );
 
 api.interceptors.response.use(
-  (response) => response.data,
+  (response) => response,
   async (error) => {
     const originalRequest = error.config;
     if (error.response.status === 401 && !originalRequest._retry) {

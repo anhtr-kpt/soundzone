@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { checkAuth } from "@/store/slices/authSlice";
+import { checkAuth } from "@/store/slices/userSlice";
 import { useAppDispatch, useAppSelector } from "@/store";
 import LoadingSpinner from "@/common/components/LoadingSpinner";
 

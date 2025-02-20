@@ -1,254 +1,245 @@
-import { NextFunction, Request, Response } from "express";
-import User, { UserRole } from "@/models/user.model";
+import { Request, Response, NextFunction } from "express";
+import { User, UserRole } from "@/models/user.model";
 import jwt from "jsonwebtoken";
-import { Types } from "mongoose";
+import crypto from "crypto";
 
-interface IRegisterUserInput {
-  email: string;
-  password: string;
-  name: string;
-}
+const generateAccessToken = (user: any) => {
+  return jwt.sign(
+    { id: user._id, role: user.role },
+    process.env.JWT_SECRET as string,
+    { expiresIn: "15m" }
+  );
+};
 
-interface ILoginInput {
-  email: string;
-  password: string;
-}
+const generateRefreshToken = (user: any) => {
+  return jwt.sign({ id: user._id }, process.env.JWT_REFRESH_SECRET as string, {
+    expiresIn: "7d",
+  });
+};
 
-class UserController {
-  public async getCurrentUser(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<any> {
-    try {
-      const userId = (req as any).user?.id;
+export const signup = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<any> => {
+  try {
+    const { firstName, lastName, email, password, avatarUrl } = req.body;
 
-      if (!userId) {
-        return res
-          .status(401)
-          .json({ success: false, message: "Unauthorized" });
-      }
-
-      const user = await User.findById(userId).select("-password");
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      res.status(200).json({ success: true, data: { user } });
-    } catch (error) {
-      console.error(error);
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Email already in use" });
     }
-  }
-  public async register(req: Request, res: Response): Promise<any> {
-    try {
-      const { email, password, name }: IRegisterUserInput = req.body;
 
-      const existingUser = await User.findOne({ email });
+    const user = await User.create({
+      firstName,
+      lastName,
+      email,
+      password,
+      avatarUrl,
+      role: UserRole.USER,
+    });
 
-      if (existingUser) {
-        return res.status(400).json({
-          success: false,
-          message: "Email already exists",
-        });
-      }
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
 
-      const user = new User({
-        email,
-        password,
-        name,
-        role: UserRole.USER,
-      });
+    user.refreshToken = refreshToken;
+    await user.save();
 
-      await user.save();
-
-      const authToken = user.generateAuthToken();
-      const refreshToken = user.generateRefreshToken();
-
-      user.refreshToken = refreshToken;
-      await user.save();
-
-      const userResponse = user.toObject();
-      const {
-        password: userPassword,
-        refreshToken: userRefreshToken,
-        ...filteredUserResponse
-      } = userResponse;
-
-      res.status(201).json({
-        success: true,
-        data: {
-          user: filteredUserResponse,
-          tokens: { authToken, refreshToken },
+    res.status(201).json({
+      success: true,
+      message: "User registered successfully",
+      data: {
+        user: {
+          id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          avatarUrl: user.avatarUrl,
+          role: user.role,
         },
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: "Error in registration",
-        error: error instanceof Error ? error.message : "Unknown error",
-      });
-    }
+        tokens: { accessToken, refreshToken },
+      },
+    });
+  } catch (error) {
+    next(error);
   }
+};
 
-  public async login(req: Request, res: Response): Promise<any> {
-    try {
-      const { email, password }: ILoginInput = req.body;
+export const login = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<any> => {
+  try {
+    const { email, password } = req.body;
 
-      const user = await User.findOne({ email }).select("+password");
+    const user = await User.findOne({ email }).select("+password");
+    if (!user) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid credentials" });
+    }
 
-      if (!user) {
-        return res.status(401).json({
-          success: false,
-          message: "Invalid credentials",
-        });
-      }
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid credentials" });
+    }
 
-      const isMatch = await user.comparePassword(password);
-      if (!isMatch) {
-        return res.status(401).json({
-          success: false,
-          message: "Invalid credentials",
-        });
-      }
+    user.lastLogin = new Date();
 
-      const authToken = user.generateAuthToken();
-      const refreshToken = user.generateRefreshToken();
+    const accessToken = user.generateAuthToken();
+    const refreshToken = user.generateRefreshToken();
 
-      user.refreshToken = refreshToken;
-      user.lastLogin = new Date();
-      await user.save();
+    user.refreshToken = refreshToken;
+    await user.save();
 
-      const userResponse = user.toObject();
-      const {
-        password: userPassword,
-        refreshToken: userRefreshToken,
-        ...filteredUserResponse
-      } = userResponse;
+    const userResponse = user.toObject();
+    const {
+      password: userPassword,
+      refreshToken: userRefreshToken,
+      ...filteredUserResponse
+    } = userResponse;
 
-      res.status(200).json({
-        success: true,
-        data: {
-          user: filteredUserResponse,
-          tokens: {
-            authToken,
-            refreshToken,
-          },
+    res.status(200).json({
+      success: true,
+      data: {
+        user: {
+          ...filteredUserResponse,
+          lastLogin: user.lastLogin,
         },
-      });
-    } catch (error) {
-      res.status(500).json({
+        tokens: { accessToken, refreshToken },
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const checkAuth = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<any> => {
+  try {
+    const userData = (req as any).user;
+    if (!userData) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const user = await User.findById(userData.id).select("-password");
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    res.status(200).json({ success: true, data: user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const logout = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<any> => {
+  try {
+    const userData = (req as any).user;
+    if (!userData) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    await User.findByIdAndUpdate(userData.id, { refreshToken: "" });
+    res.status(200).json({ success: true, message: "Logged out successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const forgotPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<any> => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+
+    const hashedResetToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
+
+    user.resetPasswordToken = hashedResetToken;
+
+    user.resetPasswordExpires = new Date(Date.now() + 10 * 60 * 1000);
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Password reset token generated",
+      data: { resetToken },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createAdmin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<any> => {
+  try {
+    const adminExists = await User.findOne({ role: UserRole.ADMIN });
+    if (adminExists) {
+      return res.status(400).json({
         success: false,
-        message: "Error in login",
-        error: error instanceof Error ? error.message : "Unknown error",
+        message: "Admin account already exists",
       });
     }
-  }
 
-  public async refreshToken(req: Request, res: Response): Promise<any> {
-    try {
-      const { refreshToken } = req.body;
+    const { email, password, firstName, lastName } = req.body;
 
-      if (!refreshToken) {
-        return res.status(401).json({
-          success: false,
-          message: "Refresh token is required",
-        });
-      }
-
-      const decoded = jwt.verify(
-        refreshToken,
-        process.env.JWT_REFRESH_SECRET as string
-      ) as { id: string };
-
-      const user = await User.findOne({
-        _id: new Types.ObjectId(decoded.id),
-        refreshToken,
-      });
-
-      if (!user) {
-        return res.status(401).json({
-          success: false,
-          message: "Invalid refresh token",
-        });
-      }
-
-      const newAuthToken = user.generateAuthToken();
-      const newRefreshToken = user.generateRefreshToken();
-
-      user.refreshToken = newRefreshToken;
-      await user.save();
-
-      res.status(200).json({
-        success: true,
-        data: {
-          tokens: {
-            authToken: newAuthToken,
-            refreshToken: newRefreshToken,
-          },
-        },
-      });
-    } catch (error) {
-      res.status(401).json({
+    if (!email || !password || !firstName || !lastName) {
+      return res.status(400).json({
         success: false,
-        message: "Invalid refresh token",
-        error: error instanceof Error ? error.message : "Unknown error",
+        message: "Email, password, firstName and lastName are required",
       });
     }
+
+    const admin = new User({
+      email,
+      password,
+      firstName,
+      lastName,
+      role: UserRole.ADMIN,
+    });
+
+    await admin.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Admin account created successfully",
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: "Error creating admin account",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
   }
-
-  public async logout(req: Request, res: Response): Promise<any> {
-    try {
-      const userId = (req as any).user.id;
-
-      await User.findByIdAndUpdate(userId, {
-        $unset: { refreshToken: 1 },
-      });
-
-      res.status(200).json({
-        success: true,
-        message: "Logged out successfully",
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: "Error in logout",
-        error: error instanceof Error ? error.message : "Unknown error",
-      });
-    }
-  }
-
-  public async createAdmin(req: Request, res: Response): Promise<any> {
-    try {
-      const adminExists = await User.findOne({ role: UserRole.ADMIN });
-      if (adminExists) {
-        return res.status(400).json({
-          success: false,
-          message: "Admin account already exists",
-        });
-      }
-
-      const { email, password, name }: IRegisterUserInput = req.body;
-
-      const admin = new User({
-        email,
-        password,
-        name,
-        role: UserRole.ADMIN,
-      });
-
-      await admin.save();
-
-      res.status(201).json({
-        success: true,
-        message: "Admin account created successfully",
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: "Error creating admin account",
-        error: error instanceof Error ? error.message : "Unknown error",
-      });
-    }
-  }
-}
-
-export default new UserController();
+};

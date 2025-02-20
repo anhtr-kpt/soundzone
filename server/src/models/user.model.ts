@@ -1,21 +1,23 @@
-import mongoose from "mongoose";
+import mongoose, { Document, Model } from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 export enum UserRole {
-  ADMIN = "admin",
   USER = "user",
+  ADMIN = "admin",
 }
 
 export interface IUser extends Document {
   email: string;
   password: string;
-  name: string;
-  role: UserRole;
+  firstName: string;
+  lastName: string;
   avatarUrl?: string;
-  isActive: boolean;
+  role: UserRole;
+  lastLogin: Date;
   refreshToken?: string;
-  lastLogin?: Date;
+  resetPasswordToken?: string;
+  resetPasswordExpires?: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
   generateAuthToken(): string;
   generateRefreshToken(): string;
@@ -27,8 +29,8 @@ const userSchema = new mongoose.Schema<IUser>(
       type: String,
       required: [true, "Email is required"],
       unique: true,
-      trim: true,
       lowercase: true,
+      trim: true,
       validate: {
         validator: function (v: string) {
           return /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(v);
@@ -39,72 +41,64 @@ const userSchema = new mongoose.Schema<IUser>(
     password: {
       type: String,
       required: [true, "Password is required"],
-      minLength: [6, "Password must be at least 6 characters"],
-      select: false,
+      minlength: [6, "Password must be at least 6 characters"],
     },
-    name: {
+    firstName: {
       type: String,
-      required: [true, "Name is required"],
+      required: true,
       trim: true,
-      minlength: [2, "Name must be at least 2 characters"],
-      maxLength: [50, "Name cannot be more than 50 characters"],
+      minlength: [1, "First name must be at least 1 character"],
+      maxLength: [30, "First name must be fewer than 30 characters"],
+    },
+    lastName: {
+      type: String,
+      required: true,
+      trim: true,
+      minlength: [1, "Last name must be at least 1 character"],
+      maxLength: [30, "Last name must be fewer than 30 characters"],
+    },
+    avatarUrl: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    lastLogin: {
+      type: Date,
+      default: Date.now,
     },
     role: {
       type: String,
       enum: Object.values(UserRole),
       default: UserRole.USER,
     },
-    avatarUrl: {
-      type: String,
-      default: "",
-    },
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
-    refreshToken: {
-      type: String,
-      select: false,
-    },
-    lastLogin: {
-      type: Date,
-    },
+    refreshToken: String,
+    resetPasswordToken: String,
+    resetPasswordExpires: Date,
   },
   {
     timestamps: true,
   }
 );
 
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-
-  try {
+userSchema.pre<IUser>("save", async function (next) {
+  if (this.isModified("password")) {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error: any) {
-    next(error);
   }
+  next();
 });
 
 userSchema.methods.comparePassword = async function (
   candidatePassword: string
 ): Promise<boolean> {
-  try {
-    return await bcrypt.compare(candidatePassword, this.password);
-  } catch (error) {
-    throw error;
-  }
+  return bcrypt.compare(candidatePassword, this.password);
 };
 
 userSchema.methods.generateAuthToken = function (): string {
   return jwt.sign(
-    {
-      id: this._id,
-      role: this.role,
-    },
+    { id: this._id, role: this.role },
     process.env.JWT_SECRET as string,
-    { expiresIn: "1h" }
+    { expiresIn: "15m" }
   );
 };
 
@@ -114,4 +108,4 @@ userSchema.methods.generateRefreshToken = function (): string {
   });
 };
 
-export default mongoose.model<IUser>("User", userSchema);
+export const User: Model<IUser> = mongoose.model<IUser>("User", userSchema);

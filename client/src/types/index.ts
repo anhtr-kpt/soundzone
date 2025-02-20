@@ -55,3 +55,14 @@ export interface IUser {
   role: "admin" | "user";
   avatar?: string;
 }
+
+export interface ILoginInput {
+  email: string;
+  password: string;
+}
+
+export interface ISignUpInput {
+  email: string;
+  password: string;
+  name: string;
+}

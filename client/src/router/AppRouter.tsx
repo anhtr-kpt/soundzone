@@ -3,6 +3,9 @@ import { Suspense, lazy } from "react";
 import LoadingSpinner from "@/common/components/LoadingSpinner";
 import { ProtectedRoute } from "./ProtectedRoute";
 import AdminLayout from "@/layouts/AdminLayout";
+import { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "@/store";
+import { checkAuth } from "@/store/slices/userSlice";
 
 // Public pages
 const Login = lazy(() => import("@/admin/pages/Login"));
@@ -143,5 +146,16 @@ const router = createBrowserRouter([
 ]);
 
 export const AppRouter = () => {
+  const dispatch = useAppDispatch();
+  const { isLoading } = useAppSelector((state) => state.auth);
+
+  useEffect(() => {
+    dispatch(checkAuth());
+  }, [dispatch]);
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
   return <RouterProvider router={router} />;
 };
