@@ -1,25 +1,27 @@
 import { Navigate } from "react-router-dom";
 import { IProtectedRouteProps } from "./types";
 import { useAppSelector } from "@/store";
-import LoadingSpinner from "@/common/components/LoadingSpinner";
+import { useCheckAuthQuery } from "@/api/usersApi";
 
 export const ProtectedRoute = ({
   children,
   requiredRole,
 }: IProtectedRouteProps) => {
-  const { user, isLoading } = useAppSelector((state) => state.auth);
-
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
+  const { user } = useAppSelector((state) => state.users);
 
   if (!user) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" replace />;
   }
 
-  if (requiredRole && user.role !== requiredRole) {
-    return <Navigate to="/" />;
-  }
+  // if (requiredRole && user.role !== requiredRole) {
+  //   if (user.role === "user") {
+  //     return <Navigate to="/" replace />;
+  //   }
+
+  //   return <Navigate to="/admin" replace />;
+  // }
+
+  console.log(user);
 
   return children;
 };

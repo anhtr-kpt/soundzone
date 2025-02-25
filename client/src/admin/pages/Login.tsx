@@ -12,11 +12,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ClipLoader } from "react-spinners";
-import { useAppDispatch, useAppSelector } from "@/store";
-import { login } from "@/store/slices/userSlice";
-import { useEffect } from "react";
+import { useLoginMutation } from "@/api/usersApi";
 
 const formSchema = z.object({
   email: z
@@ -27,27 +25,19 @@ const formSchema = z.object({
 });
 
 const Login = () => {
-  const { user, isLoading } = useAppSelector((state) => state.auth);
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
+  const [login, { isLoading }] = useLoginMutation();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      dispatch(login({ email: values.email, password: values.password }));
+      await login({ email: values.email, password: values.password }).unwrap();
     } catch (error) {
       console.error(error);
     }
   }
-
-  useEffect(() => {
-    if (user) {
-      navigate("/admin");
-    }
-  }, [user, navigate]);
 
   return (
     <div className="w-full min-h-screen relative">

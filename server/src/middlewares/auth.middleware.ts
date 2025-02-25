@@ -2,7 +2,7 @@
 import { Request, Response, NextFunction, RequestHandler } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 
-interface TokenPayload extends JwtPayload {
+export interface TokenPayload extends JwtPayload {
   id?: string;
   role?: string;
 }

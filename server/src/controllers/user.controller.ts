@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { User, UserRole } from "@/models/user.model";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import { TokenPayload } from "@/middlewares/auth.middleware";
 
 const generateAccessToken = (user: any) => {
   return jwt.sign(
@@ -49,7 +50,7 @@ export const signup = async (
 
     res.status(201).json({
       success: true,
-      message: "User registered successfully",
+      message: "Signed up successfully!",
       data: {
         user: {
           id: user._id,
@@ -106,6 +107,7 @@ export const login = async (
 
     res.status(200).json({
       success: true,
+      message: "Logged in successfully!",
       data: {
         user: {
           ...filteredUserResponse,
@@ -119,7 +121,66 @@ export const login = async (
   }
 };
 
-export const checkAuth = async (
+export const refreshToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      res.status(400).json({ message: "Refresh token is required" });
+      return;
+    }
+
+    let decoded: TokenPayload;
+
+    try {
+      decoded = jwt.verify(
+        refreshToken,
+        process.env.JWT_REFRESH_SECRET as string
+      ) as TokenPayload;
+    } catch (error) {
+      res.status(401).json({ message: "Invalid or expired refresh token" });
+      return;
+    }
+
+    const user = await User.findById(decoded.id);
+
+    if (!user || user.refreshToken !== refreshToken) {
+      res.status(401).json({ message: "Invalid refresh token" });
+      return;
+    }
+
+    const authToken = user.generateAuthToken();
+    const newRefreshToken = user.generateRefreshToken();
+
+    user.refreshToken = newRefreshToken;
+    user.lastLogin = new Date();
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      tokens: {
+        authToken,
+        refreshToken: newRefreshToken,
+      },
+      user: {
+        id: user._id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        avatarUrl: user.avatarUrl,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getMe = async (
   req: Request,
   res: Response,
   next: NextFunction

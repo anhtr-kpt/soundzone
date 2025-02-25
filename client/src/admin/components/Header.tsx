@@ -28,7 +28,7 @@ const Header = () => {
   }, [lastScrollY]);
   return (
     <header
-      className={`fixed z-10 top-0 left-0 right-0 ml-56 py-4 px-8 flex gap-6 justify-between items-center transition-transform duration-300 ${
+      className={`fixed bg-background z-10 top-0 left-0 right-0 ml-56 py-4 px-8 flex gap-6 justify-between items-center transition-transform duration-300 ${
         show ? "translate-y-0" : "-translate-y-full"
       } ${lastScrollY > 0 ? "border-b" : ""}`}
     >
