@@ -1,3 +1,52 @@
+export const urlRegex = /^https?:\/\/.+/;
+export const colorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+
+export interface ApiResponse {
+  success: boolean;
+  message: string;
+}
+
+export enum UserRole {
+  USER = "user",
+  ADMIN = "admin",
+}
+
+export interface User {
+  _id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl?: string;
+  role: UserRole;
+  lastLogin?: Date;
+  refreshToken: string;
+  accessToken: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse extends ApiResponse {
+  data: User;
+}
+
+export interface SignupResponse extends ApiResponse {
+  data: {
+    email: string;
+    firstName: string;
+    lastName: string;
+  };
+}
+
+export interface SignupRequest {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+}
+
 export interface ISongData {
   _id: string;
   title: string;
@@ -40,29 +89,41 @@ export interface ILabel {
   isMandatory?: boolean;
 }
 
-export const urlRegex = /^https?:\/\/.+/;
-export const colorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
-
 export interface IUploadResponse {
   url: string;
   publicId: string;
 }
 
-export interface IUser {
-  _id: string;
-  email: string;
-  name: string;
-  role: "admin" | "user";
-  avatar?: string;
-}
-
-export interface ILoginInput {
+export interface SignupRequest {
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
+  avatarUrl?: string;
 }
 
-export interface ISignUpInput {
-  email: string;
-  password: string;
-  name: string;
+export interface AuthResponse {
+  success: boolean;
+  message: string;
+  data: {
+    user: User;
+    tokens: {
+      accessToken: string;
+      refreshToken: string;
+    };
+  };
+}
+
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
+export interface RefreshTokenResponse {
+  message: string;
+  success: boolean;
+  tokens: {
+    accessToken: string;
+    refreshToken: string;
+  };
+  user: User;
 }

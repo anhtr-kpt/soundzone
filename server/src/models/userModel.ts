@@ -8,26 +8,27 @@ export enum UserRole {
 }
 
 export interface IUser extends Document {
+  name: string;
   email: string;
   password: string;
-  firstName: string;
-  lastName: string;
-  avatarUrl?: string;
   role: UserRole;
-  lastLogin: Date;
-  refreshToken?: string;
+  avatarUrl: string;
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
-  generateAuthToken(): string;
-  generateRefreshToken(): string;
 }
 
 const userSchema = new mongoose.Schema<IUser>(
   {
+    name: {
+      type: String,
+      required: [true, "Please enter your name"],
+      trim: true,
+      maxlength: [50, "Name cannot exceed 50 characters"],
+    },
     email: {
       type: String,
-      required: [true, "Email is required"],
+      required: [true, "Please enter your email"],
       unique: true,
       lowercase: true,
       trim: true,
@@ -40,38 +41,20 @@ const userSchema = new mongoose.Schema<IUser>(
     },
     password: {
       type: String,
-      required: [true, "Password is required"],
+      required: [true, "Please enter your password"],
       minlength: [6, "Password must be at least 6 characters"],
-    },
-    firstName: {
-      type: String,
-      required: true,
-      trim: true,
-      minlength: [1, "First name must be at least 1 character"],
-      maxLength: [30, "First name must be fewer than 30 characters"],
-    },
-    lastName: {
-      type: String,
-      required: true,
-      trim: true,
-      minlength: [1, "Last name must be at least 1 character"],
-      maxLength: [30, "Last name must be fewer than 30 characters"],
+      select: false,
     },
     avatarUrl: {
       type: String,
       trim: true,
       default: "",
     },
-    lastLogin: {
-      type: Date,
-      default: Date.now,
-    },
     role: {
       type: String,
       enum: Object.values(UserRole),
       default: UserRole.USER,
     },
-    refreshToken: String,
     resetPasswordToken: String,
     resetPasswordExpires: Date,
   },
@@ -81,11 +64,15 @@ const userSchema = new mongoose.Schema<IUser>(
 );
 
 userSchema.pre<IUser>("save", async function (next) {
-  if (this.isModified("password")) {
+  if (!this.isModified("password")) return next();
+
+  try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error: any) {
+    next(error);
   }
-  next();
 });
 
 userSchema.methods.comparePassword = async function (
@@ -94,18 +81,5 @@ userSchema.methods.comparePassword = async function (
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-userSchema.methods.generateAuthToken = function (): string {
-  return jwt.sign(
-    { id: this._id, role: this.role },
-    process.env.JWT_SECRET as string,
-    { expiresIn: "15m" }
-  );
-};
-
-userSchema.methods.generateRefreshToken = function (): string {
-  return jwt.sign({ id: this._id }, process.env.JWT_REFRESH_SECRET as string, {
-    expiresIn: "7d",
-  });
-};
-
-export const User: Model<IUser> = mongoose.model<IUser>("User", userSchema);
+const User = mongoose.model<IUser>("User", userSchema);
+export default User;

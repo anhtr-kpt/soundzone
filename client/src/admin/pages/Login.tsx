@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import { ClipLoader } from "react-spinners";
-import { useLoginMutation } from "@/api/usersApi";
+import { useLoginMutation } from "@/api/authApi";
 
 const formSchema = z.object({
   email: z

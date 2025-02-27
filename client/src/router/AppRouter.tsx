@@ -1,8 +1,8 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import LoadingSpinner from "@/common/components/LoadingSpinner";
-import { ProtectedRoute } from "./ProtectedRoute";
 import AdminLayout from "@/layouts/AdminLayout";
+import { AdminGuard } from "./Guards/AdminGuard";
 
 // Public pages
 const Login = lazy(() => import("@/admin/pages/Login"));
@@ -43,14 +43,11 @@ const router = createBrowserRouter([
   {
     path: "/admin/*",
     element: (
-      <Suspense fallback={<LoadingSpinner />}>
-        <AdminLayout />
-      </Suspense>
-      // <ProtectedRoute requiredRole="admin">
-      //   <Suspense fallback={<LoadingSpinner />}>
-      //     <AdminLayout />
-      //   </Suspense>
-      // </ProtectedRoute>
+      <AdminGuard>
+        <Suspense fallback={<LoadingSpinner />}>
+          <AdminLayout />
+        </Suspense>
+      </AdminGuard>
     ),
     children: [
       {
