@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import GenresList from "../components/GenresList";
 
-const Genres = () => {
+const GenresPage = () => {
   return (
     <div>
       <Link to="/admin/genres/create-genre">Create genre</Link>
@@ -10,4 +10,4 @@ const Genres = () => {
   );
 };
 
-export default Genres;
+export default GenresPage;

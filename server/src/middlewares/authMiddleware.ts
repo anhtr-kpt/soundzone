@@ -31,7 +31,7 @@ export const protect = async (
       return;
     }
 
-    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
+    const decoded = jwt.verify(token, JWT_SECRET as string) as JwtPayload;
 
     const user = await User.findById(decoded.id);
     if (!user) {

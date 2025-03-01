@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { urlRegex } from "@/types";
+// import { urlRegex } from "@/types";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,10 +22,10 @@ import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
-import { IUploadResponse } from "@/types";
+// import { IUploadResponse } from "@/types";
 import { ImageUpload } from "../components/ImageUpload";
 import { useState } from "react";
-import { useCreateArtist } from "@/hooks/useArtists";
+// import { useCreateArtist } from "@/hooks/useArtists";
 
 const formSchema = z.object({
   fullName: z.string().min(1, "Full name is required").trim(),
@@ -52,14 +52,14 @@ const formSchema = z.object({
   }),
   socialLinks: z
     .object({
-      facebook: z.string().regex(urlRegex, "Invalid URL format").optional(),
-      instagram: z.string().regex(urlRegex, "Invalid URL format").optional(),
-      youtube: z.string().regex(urlRegex, "Invalid URL format").optional(),
+      // facebook: z.string().regex(urlRegex, "Invalid URL format").optional(),
+      // instagram: z.string().regex(urlRegex, "Invalid URL format").optional(),
+      // youtube: z.string().regex(urlRegex, "Invalid URL format").optional(),
     })
     .optional(),
 });
 
-const CreateArtist = () => {
+const CreateArtistPage = () => {
   const [error, setError] = useState<string>("");
 
   // const { data: artists, isLoading, error } = useArtists();
@@ -79,7 +79,7 @@ const CreateArtist = () => {
       <h3 className="capitalize text-2xl font-semibold text-center mb-8">
         Create new artist
       </h3>
-      <button
+      {/* <button
         onClick={() =>
           createArtist.mutate({
             name: "New User",
@@ -88,7 +88,7 @@ const CreateArtist = () => {
         }
       >
         Add User
-      </button>
+      </button> */}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-4 lg:space-y-0 lg:flex lg:[&_div]:flex-1 lg:space-x-4">
@@ -290,4 +290,4 @@ const CreateArtist = () => {
   );
 };
 
-export default CreateArtist;
+export default CreateArtistPage;

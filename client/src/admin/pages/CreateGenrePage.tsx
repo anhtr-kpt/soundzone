@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { colorRegex } from "@/types";
+// import { colorRegex } from "@/types";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,10 +23,10 @@ const formSchema = z.object({
     .min(1, "Bio is required")
     .max(500, "Bio cannot exceed 500 characters")
     .trim(),
-  color: z.string().regex(colorRegex, "Invalid color format"),
+  // color: z.string().regex(colorRegex, "Invalid color format"),
 });
 
-const CreateGenre = () => {
+const CreateGenrePage = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -103,4 +103,4 @@ const CreateGenre = () => {
   );
 };
 
-export default CreateGenre;
+export default CreateGenrePage;

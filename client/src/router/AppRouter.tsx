@@ -1,142 +1,79 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { Suspense, lazy } from "react";
-import LoadingSpinner from "@/common/components/LoadingSpinner";
+import SignInPage from "@/components/common/SignInPage";
 import AdminLayout from "@/layouts/AdminLayout";
 import { AdminGuard } from "./Guards/AdminGuard";
-
-// Public pages
-const Login = lazy(() => import("@/admin/pages/Login"));
-
-// Admin pages
-const AdminDashboard = lazy(() => import("@/admin/pages/Dashboard"));
-const AdminSongs = lazy(() => import("@/admin/pages/Songs"));
-const AdminArtists = lazy(() => import("@/admin/pages/Artists"));
-const AdminPlaylists = lazy(() => import("@/admin/pages/Playlists"));
-const AdminUsers = lazy(() => import("@/admin/pages/Users"));
-const AdminSongDetail = lazy(() => import("@/admin/pages/SongDetail"));
-const AdminCreateSong = lazy(() => import("@/admin/pages/CreateSong"));
-const AdminArtistDetail = lazy(() => import("@/admin/pages/ArtistDetail"));
-const AdminCreateArtist = lazy(() => import("@/admin/pages/CreateArtist"));
-const AdminGenres = lazy(() => import("@/admin/pages/Genres"));
-const AdminCreateGenre = lazy(() => import("@/admin/pages/CreateGenre"));
-
-// User pages
-// const UserDashboard = lazy(() => import("@/user/pages/Dashboard"));
-// const UserSongs = lazy(() => import("@/user/pages/Songs"));
-// const UserArtists = lazy(() => import("@/user/pages/Artists"));
-// const UserPlaylists = lazy(() => import("@/user/pages/Playlists"));
-// const UserUsers = lazy(() => import("@/user/pages/Users"));
-
-// const UserLayout = lazy(() => import("@/layouts/UserLayout"));
+import {
+  DashboardPage as AdminDashboard,
+  UsersPage as AdminUsers,
+  SongsPage as AdminSongs,
+  SongDetailPage as AdminSongDetail,
+  ArtistDetailPage as AdminArtistDetail,
+  CreateSongPage as AdminCreateSong,
+  CreateArtistPage as AdminCreateArtist,
+  ArtistsPage as AdminArtists,
+  GenresPage as AdminGenres,
+  CreateGenrePage as AdminCreateGenre,
+  PlaylistsPage as AdminPlaylists,
+} from "@/admin/pages";
 
 const router = createBrowserRouter([
   // Public routes
   {
-    path: "/login",
-    element: (
-      <Suspense fallback={<LoadingSpinner />}>
-        <Login />
-      </Suspense>
-    ),
+    path: "/signin",
+    element: <SignInPage />,
   },
   // Admin routes
   {
     path: "/admin/*",
     element: (
       <AdminGuard>
-        <Suspense fallback={<LoadingSpinner />}>
-          <AdminLayout />
-        </Suspense>
+        <AdminLayout />
       </AdminGuard>
     ),
     children: [
       {
         index: true,
-        element: (
-          <Suspense fallback={<LoadingSpinner />}>
-            <AdminDashboard />
-          </Suspense>
-        ),
+        element: <AdminDashboard />,
       },
       {
         path: "users",
-        element: (
-          <Suspense fallback={<LoadingSpinner />}>
-            <AdminUsers />
-          </Suspense>
-        ),
+        element: <AdminUsers />,
       },
       {
         path: "songs",
-        element: (
-          <Suspense fallback={<LoadingSpinner />}>
-            <AdminSongs />
-          </Suspense>
-        ),
+        element: <AdminSongs />,
       },
       {
         path: "songs/:id",
-        element: (
-          <Suspense fallback={<LoadingSpinner />}>
-            <AdminSongDetail />
-          </Suspense>
-        ),
+        element: <AdminSongDetail />,
       },
       {
         path: "songs/create-song",
-        element: (
-          <Suspense fallback={<LoadingSpinner />}>
-            <AdminCreateSong />
-          </Suspense>
-        ),
+        element: <AdminCreateSong />,
       },
       {
         path: "artists",
-        element: (
-          <Suspense fallback={<LoadingSpinner />}>
-            <AdminArtists />
-          </Suspense>
-        ),
+        element: <AdminArtists />,
       },
       {
         path: "genres",
-        element: (
-          <Suspense fallback={<LoadingSpinner />}>
-            <AdminGenres />
-          </Suspense>
-        ),
+        element: <AdminGenres />,
       },
       {
         path: "genres/create-genre",
-        element: (
-          <Suspense fallback={<LoadingSpinner />}>
-            <AdminCreateGenre />
-          </Suspense>
-        ),
+        element: <AdminCreateGenre />,
       },
       {
         path: "artists/:id",
-        element: (
-          <Suspense fallback={<LoadingSpinner />}>
-            <AdminArtistDetail />
-          </Suspense>
-        ),
+        element: <AdminArtistDetail />,
       },
       {
         path: "artists/create-artist",
-        element: (
-          <Suspense fallback={<LoadingSpinner />}>
-            <AdminCreateArtist />
-          </Suspense>
-        ),
+        element: <AdminCreateArtist />,
       },
       {
         path: "playlists",
-        element: (
-          <Suspense fallback={<LoadingSpinner />}>
-            <AdminPlaylists />
-          </Suspense>
-        ),
+        element: <AdminPlaylists />,
       },
     ],
   },

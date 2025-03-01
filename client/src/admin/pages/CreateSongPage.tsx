@@ -1,18 +1,18 @@
-import FormField from "../components/FormField";
+// import FormField from "../components/FormField";
 
-const CreateSong = () => {
+const CreateSongPage = () => {
   return (
     <div>
       <form className="">
-        <FormField
+        {/* <FormField
           inputId="song-title"
           inputName="Title"
           inputPlaceholder="Title"
           inputType="text"
-        />
+        /> */}
       </form>
     </div>
   );
 };
 
-export default CreateSong;
+export default CreateSongPage;

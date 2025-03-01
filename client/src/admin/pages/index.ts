@@ -1,0 +1,11 @@
+export { default as DashboardPage } from "./DashboardPage";
+export { default as UsersPage } from "./UsersPage";
+export { default as SongsPage } from "./SongsPage";
+export { default as SongDetailPage } from "./SongDetailPage";
+export { default as ArtistDetailPage } from "./ArtistDetailPage";
+export { default as CreateSongPage } from "./CreateSongPage";
+export { default as CreateArtistPage } from "./CreateArtistPage";
+export { default as ArtistsPage } from "./ArtistsPage";
+export { default as GenresPage } from "./GenresPage";
+export { default as CreateGenrePage } from "./CreateGenrePage";
+export { default as PlaylistsPage } from "./PlaylistsPage";

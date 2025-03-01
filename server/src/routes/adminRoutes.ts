@@ -6,7 +6,7 @@ import { protect, adminOnly } from "../middlewares/authMiddleware";
 const router = express.Router();
 
 router.post(
-  "/admin",
+  "/create-account",
   [
     body("name").notEmpty().withMessage("Name is required"),
     body("email").isEmail().withMessage("Please provide a valid email"),
@@ -14,8 +14,8 @@ router.post(
       .isLength({ min: 8 })
       .withMessage("Password must be at least 8 characters long"),
   ],
-  protect,
-  adminOnly,
+  // protect,
+  // adminOnly,
   createAdminAccount
 );
 

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import SongsList from "../components/SongsList";
 
-const Songs = () => {
+const SongsPage = () => {
   return (
     <div>
       <Link to="/admin/songs/create-song">Create song</Link>
@@ -10,4 +10,4 @@ const Songs = () => {
   );
 };
 
-export default Songs;
+export default SongsPage;

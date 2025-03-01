@@ -1,7 +1,7 @@
 import ArtistsList from "../components/ArtistsList";
 import { Link } from "react-router-dom";
 
-const Artists = () => {
+const ArtistsPage = () => {
   return (
     <div>
       <Link to="/admin/artists/create-artist">Create artist</Link>
@@ -10,4 +10,4 @@ const Artists = () => {
   );
 };
 
-export default Artists;
+export default ArtistsPage;

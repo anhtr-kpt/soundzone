@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import jwt from "jsonwebtoken";
+import jwt, { SignOptions } from "jsonwebtoken";
 import { validationResult } from "express-validator";
 import User, { UserRole, IUser } from "@/models/userModel";
 import { JWT_SECRET, JWT_EXPIRES_IN, COOKIE_EXPIRES_IN } from "@/config/jwt";
@@ -13,7 +13,7 @@ import sendEmail from "@/utils/emailService";
 const generateTokenAndSetCookie = (user: IUser, res: Response): string => {
   const token = jwt.sign({ id: user._id }, JWT_SECRET, {
     expiresIn: JWT_EXPIRES_IN,
-  });
+  } as SignOptions);
 
   const cookieOptions = {
     expires: new Date(Date.now() + COOKIE_EXPIRES_IN),

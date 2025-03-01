@@ -23,7 +23,7 @@ const lyrics = `Có những khúc hát mãi dở dang Có những khúc hát ch�
     đổi thay Chỉ còn anh với vô tận Chìm trong bóng tối ngày ấy Vì sao anh
     hái cho em Chẳng thể soi sáng hết bóng tối trong lòng anh Mãi vì em`;
 
-const SongDetail = () => {
+const SongDetailPage = () => {
   return (
     <div className="space-y-10">
       <section className="flex gap-8">
@@ -107,4 +107,4 @@ const SongDetail = () => {
   );
 };
 
-export default SongDetail;
+export default SongDetailPage;
