@@ -1,5 +1,5 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import SignInPage from "@/components/common/SignInPage";
+import SignInPage from "@/common/pages/SignInPage";
 import AdminLayout from "@/layouts/AdminLayout";
 import { AdminGuard } from "./Guards/AdminGuard";
 import {
@@ -15,6 +15,7 @@ import {
   CreateGenrePage as AdminCreateGenre,
   PlaylistsPage as AdminPlaylists,
 } from "@/admin/pages";
+import NotFoundPage from "@/common/pages/NotFoundPage";
 
 const router = createBrowserRouter([
   // Public routes
@@ -76,6 +77,10 @@ const router = createBrowserRouter([
         element: <AdminPlaylists />,
       },
     ],
+  },
+  {
+    path: "*",
+    element: <NotFoundPage />,
   },
 ]);
 

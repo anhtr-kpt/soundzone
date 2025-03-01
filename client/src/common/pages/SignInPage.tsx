@@ -27,7 +27,7 @@ const formSchema = z.object({
 });
 
 const SignInPage = () => {
-  const [signIn, { isLoading, error, isEror }] = useSignInMutation();
+  const [signIn, { isLoading }] = useSignInMutation();
 
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
