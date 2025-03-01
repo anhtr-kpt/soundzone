@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-// import { colorRegex } from "@/types";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,29 +12,45 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { HexColorPicker } from "react-colorful";
-import { randomColor } from "@/utils/randomColor";
+import { useCreateGenreMutation } from "@/store/api/genreApi";
+import toast from "react-hot-toast";
 
 const formSchema = z.object({
-  title: z.string().min(1, "Title is required").trim(),
+  name: z.string().min(1, "Name is required").trim(),
   description: z
     .string()
     .min(1, "Bio is required")
     .max(500, "Bio cannot exceed 500 characters")
     .trim(),
-  // color: z.string().regex(colorRegex, "Invalid color format"),
 });
 
 const CreateGenrePage = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      color: randomColor(),
+      name: "",
+      description: "",
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  const [createGenre, { isLoading }] = useCreateGenreMutation();
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      const response = await createGenre({
+        name: values.name,
+        description: values.description,
+      }).unwrap();
+
+      if (response.success) {
+        toast.success(response.message);
+        form.reset();
+      } else {
+        toast.error(response.message);
+      }
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   return (
@@ -47,12 +62,12 @@ const CreateGenrePage = () => {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
             control={form.control}
-            name="title"
+            name="name"
             render={({ field }) => (
               <FormItem className="space-y-2">
-                <FormLabel required>Title</FormLabel>
+                <FormLabel required>Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Title" {...field} className="text-sm" />
+                  <Input placeholder="Name" {...field} className="text-sm" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -70,22 +85,6 @@ const CreateGenrePage = () => {
                     className="resize-none text-sm"
                     rows={1}
                     {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="color"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel required>Color</FormLabel>
-                <FormControl>
-                  <HexColorPicker
-                    color={field.value}
-                    onChange={field.onChange}
                   />
                 </FormControl>
                 <FormMessage />

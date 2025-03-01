@@ -1,9 +1,10 @@
-import { AuthResponse, SignInRequest } from "@/types/auth.types";
 import { apiSlice } from "./apiSlice";
 import {
   ForgotPasswordRequest,
   ResetPasswordRequest,
   SignUpRequest,
+  AuthResponse,
+  SignInRequest,
 } from "@/types/auth.types";
 
 export const authApi = apiSlice.injectEndpoints({
