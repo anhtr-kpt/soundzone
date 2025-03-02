@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-// import { urlRegex } from "@/types";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,89 +17,119 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Upload } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
-// import { IUploadResponse } from "@/types";
-import { ImageUpload } from "../components/ImageUpload";
+import { UploadResponse, urlRegex } from "@/types/common.types";
 import { useState } from "react";
-// import { useCreateArtist } from "@/hooks/useArtists";
+import { CLOUDINARY_CONFIG } from "@/config/cloudinary";
+import axios from "axios";
+import { useCreateArtistMutation } from "@/store/api/artistApi";
 
 const formSchema = z.object({
-  fullName: z.string().min(1, "Full name is required").trim(),
+  realName: z.string().min(1, "Real name is required").trim(),
   stageName: z.string().min(1, "Stage name is required").trim(),
-  bio: z
-    .string()
-    .min(1, "Bio is required")
-    .max(500, "Bio cannot exceed 500 characters")
-    .trim(),
-  avatarUrl: z
-    .object({
-      url: z.string(),
-      publicId: z.string(),
-    })
-    .nullable(),
-  bannerUrl: z
-    .object({
-      url: z.string(),
-      publicId: z.string(),
-    })
-    .nullable(),
-  dateOfBirth: z.date({
+  biography: z.string().min(1, "Biography is required").trim(),
+  dateOfBirth: z.coerce.date({
     required_error: "A date of birth is required",
   }),
   socialLinks: z
     .object({
-      // facebook: z.string().regex(urlRegex, "Invalid URL format").optional(),
-      // instagram: z.string().regex(urlRegex, "Invalid URL format").optional(),
-      // youtube: z.string().regex(urlRegex, "Invalid URL format").optional(),
+      facebook: z.string().regex(urlRegex, "Invalid URL format").optional(),
+      instagram: z.string().regex(urlRegex, "Invalid URL format").optional(),
+      youtube: z.string().regex(urlRegex, "Invalid URL format").optional(),
     })
     .optional(),
+  avatar: z.any().refine((val) => val !== null, "Avatar is required"),
 });
 
 const CreateArtistPage = () => {
-  const [error, setError] = useState<string>("");
-
-  // const { data: artists, isLoading, error } = useArtists();
-
-  const createArtist = useCreateArtist();
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      avatar: null,
+    },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string>("");
+  const [createArtist, { isLoading }] = useCreateArtistMutation();
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      if (!selectedFile) {
+        form.setError("avatar", {
+          type: "manual",
+          message: "Avatar is required",
+        });
+        return;
+      }
+
+      const uploadResponse = await uploadToCloudinary(selectedFile);
+
+      const response = await createArtist({
+        ...values,
+        avatarUrl: uploadResponse.secure_url,
+      }).unwrap();
+
+      if (response.success) {
+        form.reset();
+        setPreview("");
+        setSelectedFile(null);
+      }
+    } catch (error) {
+      console.error("Error when submitting form:", error);
+    }
   }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setSelectedFile(file);
+    form.setValue("avatar", file);
+    form.clearErrors("avatar");
+
+    const objectUrl = URL.createObjectURL(file);
+    setPreview(objectUrl);
+
+    return () => {
+      URL.revokeObjectURL(objectUrl);
+    };
+  };
+
+  const uploadToCloudinary = async (file: File): Promise<UploadResponse> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", CLOUDINARY_CONFIG.uploadPreset as string);
+
+    try {
+      const response = await axios.post(CLOUDINARY_CONFIG.uploadUrl, formData);
+      return response.data;
+    } catch (error) {
+      console.error("Upload to Cloudinary failed:", error);
+      throw error;
+    }
+  };
 
   return (
     <div>
       <h3 className="capitalize text-2xl font-semibold text-center mb-8">
         Create new artist
       </h3>
-      {/* <button
-        onClick={() =>
-          createArtist.mutate({
-            name: "New User",
-            email: "new@example.com",
-          })
-        }
-      >
-        Add User
-      </button> */}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-4 lg:space-y-0 lg:flex lg:[&_div]:flex-1 lg:space-x-4">
             <FormField
               control={form.control}
-              name="fullName"
+              name="realName"
               render={({ field }) => (
                 <FormItem className="space-y-2">
-                  <FormLabel required>Full name</FormLabel>
+                  <FormLabel required>Real name</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Full name"
+                      placeholder="Real name"
                       {...field}
                       className="text-sm"
                     />
@@ -170,10 +199,10 @@ const CreateArtistPage = () => {
           </div>
           <FormField
             control={form.control}
-            name="bio"
+            name="biography"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>Bio</FormLabel>
+                <FormLabel required>Biography</FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="Tell us a little bit about artist"
@@ -188,41 +217,42 @@ const CreateArtistPage = () => {
           />
           <FormField
             control={form.control}
-            name="avatarUrl"
-            render={() => (
+            name="avatar"
+            render={({ field }) => (
               <FormItem>
                 <FormLabel required>Avatar</FormLabel>
                 <FormControl>
-                  <ImageUpload
-                    onUploadComplete={(response: IUploadResponse) => {
-                      form.setValue("avatarUrl", response);
-                    }}
-                    onUploadError={(error: Error) => {
-                      setError(error.message);
-                    }}
-                    type="avatar"
-                  />
+                  <div className="space-y-4 mx-auto">
+                    <div className="flex flex-col gap-4">
+                      {preview && (
+                        <div className="border border-neutral-200 dark:border-neutral-800 w-fit rounded-full">
+                          <img
+                            src={preview}
+                            alt="Preview"
+                            className="aspect-square size-64 rounded-full"
+                          />
+                        </div>
+                      )}
+                      <div className="mx-auto">
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileChange}
+                          className="hidden"
+                          id={`avatar-upload`}
+                        />
+                        <label
+                          htmlFor={`avatar-upload`}
+                          className="rounded-md transition-colors h-9 inline-flex px-5 py-1 items-center justify-center gap-2 text-sm font-medium border border-neutral-200 bg-white hover:bg-neutral-100 hover:text-neutral-900 dark:border-neutral-800 dark:bg-neutral-950 dark:hover:bg-neutral-800 dark:hover:text-neutral-50"
+                        >
+                          <Upload strokeWidth={1.5} size={18} />
+                          <span className="">Upload avatar</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
                 </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="bannerUrl"
-            render={() => (
-              <FormItem>
-                <FormLabel required>Banner</FormLabel>
-                <FormControl>
-                  <ImageUpload
-                    onUploadComplete={(response: IUploadResponse) => {
-                      form.setValue("bannerUrl", response);
-                    }}
-                    onUploadError={(error: Error) => {
-                      setError(error.message);
-                    }}
-                    type="banner"
-                  />
-                </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -243,7 +273,6 @@ const CreateArtistPage = () => {
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="socialLinks.instagram"
@@ -261,7 +290,6 @@ const CreateArtistPage = () => {
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="socialLinks.youtube"

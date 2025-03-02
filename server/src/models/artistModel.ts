@@ -8,7 +8,6 @@ export interface IArtist extends Document {
   biography: string;
   dateOfBirth: Date;
   avatarUrl: string;
-  bannerUrl: string;
   socialLinks?: {
     facebookUrl?: string;
     youtubeUrl?: string;
@@ -48,11 +47,6 @@ const artistSchema = new mongoose.Schema<IArtist>(
     avatarUrl: {
       type: String,
       required: [true, "Avatar URL is required"],
-      trim: true,
-    },
-    bannerUrl: {
-      type: String,
-      required: [true, "Banner URL is required"],
       trim: true,
     },
     socialLinks: {
