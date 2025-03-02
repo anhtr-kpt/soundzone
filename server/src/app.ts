@@ -2,6 +2,7 @@ import express, { Application } from "express";
 import adminRoutes from "@/routes/adminRoutes";
 import authRoutes from "@/routes/authRoutes";
 import genreRoutes from "@/routes/genreRoutes";
+import artistRoutes from "@/routes/artistRoutes";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -22,6 +23,7 @@ app.use(
 app.use("/api/admin", adminRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/genres", genreRoutes);
+app.use("/api/artists", artistRoutes);
 
 app.use(errorHandler);
 
