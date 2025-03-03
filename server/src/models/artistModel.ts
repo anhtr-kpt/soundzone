@@ -1,62 +1,41 @@
-import mongoose, { Document } from "mongoose";
+import mongoose, { Document, Types } from "mongoose";
 import slugify from "slugify";
 
-export interface IArtist extends Document {
-  realName: string;
-  stageName: string;
+interface IArtist extends Document {
+  name: string;
   slug: string;
-  biography: string;
-  dateOfBirth: Date;
+  bio?: string;
   avatarUrl: string;
-  socialLinks?: {
-    facebookUrl?: string;
-    youtubeUrl?: string;
-    instagramUrl?: string;
+  social: {
+    facebook?: string;
+    instagram?: string;
+    youtube?: string;
   };
-  followerCount: number;
 }
 
 const artistSchema = new mongoose.Schema<IArtist>(
   {
-    realName: {
+    name: {
       type: String,
-      required: [true, "Real name is required"],
-      trim: true,
-      maxlength: [30, "Real name cannot exceed 30 characters"],
-    },
-    stageName: {
-      type: String,
-      required: [true, "Stage name is required"],
+      required: [true, "Name is required"],
       trim: true,
     },
     slug: {
       type: String,
-      required: true,
       unique: true,
-      trim: true,
     },
-    biography: {
+    bio: {
       type: String,
-      required: [true, "Biography is required"],
       trim: true,
-    },
-    dateOfBirth: {
-      type: Date,
-      required: [true, "Date of birth is required"],
     },
     avatarUrl: {
       type: String,
       required: [true, "Avatar URL is required"],
-      trim: true,
     },
-    socialLinks: {
-      facebookUrl: { type: String, trim: true, default: "" },
-      youtubeUrl: { type: String, trim: true, default: "" },
-      instagramUrl: { type: String, trim: true, default: "" },
-    },
-    followerCount: {
-      type: Number,
-      default: 0,
+    social: {
+      facebook: String,
+      youtube: String,
+      instagram: String,
     },
   },
   {
@@ -64,9 +43,9 @@ const artistSchema = new mongoose.Schema<IArtist>(
   }
 );
 
-artistSchema.pre<IArtist>("validate", function (next) {
-  if (!this.slug || this.isModified("stageName")) {
-    this.slug = slugify(this.stageName, { lower: true, strict: true });
+artistSchema.pre<IArtist>("save", function (next) {
+  if (!this.slug || this.isModified("name")) {
+    this.slug = slugify(this.name, { lower: true, strict: true });
   }
   next();
 });

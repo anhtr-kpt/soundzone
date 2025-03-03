@@ -1,4 +1,4 @@
-import mongoose, { Document } from "mongoose";
+import mongoose, { Document, Schema, Types } from "mongoose";
 import bcrypt from "bcryptjs";
 
 export enum UserRole {
@@ -7,11 +7,17 @@ export enum UserRole {
 }
 
 export interface IUser extends Document {
-  name: string;
+  username: string;
   email: string;
   password: string;
   role: UserRole;
-  avatarUrl: string;
+  avatarUrl?: string;
+  favorites: {
+    songs: Types.ObjectId[];
+    albums: Types.ObjectId[];
+    playlists: Types.ObjectId[];
+    artists: Types.ObjectId[];
+  };
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -19,40 +25,40 @@ export interface IUser extends Document {
 
 const userSchema = new mongoose.Schema<IUser>(
   {
-    name: {
+    username: {
       type: String,
-      required: [true, "Please enter your name"],
+      required: true,
       trim: true,
-      maxlength: [50, "Name cannot exceed 50 characters"],
     },
     email: {
       type: String,
-      required: [true, "Please enter your email"],
+      required: [true, "Email is required"],
       unique: true,
-      lowercase: true,
-      trim: true,
-      validate: {
-        validator: function (v: string) {
-          return /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(v);
-        },
-        message: "Please enter a valid email",
-      },
+      match: [
+        /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+        "Please enter a valid email",
+      ],
     },
     password: {
       type: String,
-      required: [true, "Please enter your password"],
-      minlength: [6, "Password must be at least 6 characters"],
+      required: [true, "Password is required"],
+      minlength: [6, "Password must be at least 6 characters long"],
       select: false,
     },
     avatarUrl: {
       type: String,
-      trim: true,
       default: "",
     },
     role: {
       type: String,
       enum: Object.values(UserRole),
       default: UserRole.USER,
+    },
+    favorites: {
+      songs: [{ type: Schema.Types.ObjectId, ref: "Song" }],
+      albums: [{ type: Schema.Types.ObjectId, ref: "Album" }],
+      playlists: [{ type: Schema.Types.ObjectId, ref: "Playlist" }],
+      artists: [{ type: Schema.Types.ObjectId, ref: "Artist" }],
     },
     resetPasswordToken: String,
     resetPasswordExpires: Date,

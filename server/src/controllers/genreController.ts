@@ -7,7 +7,7 @@ export const createGenre = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { name, description } = req.body;
+    const { name, description, slug } = req.body;
 
     if (!name) {
       res
@@ -22,7 +22,7 @@ export const createGenre = async (
       res.status(400).json({ success: false, message: "Genre already exists" });
     }
 
-    const genre = new Genre({ name, description });
+    const genre = new Genre({ name, description, slug });
     await genre.save();
 
     res.status(201).json({
@@ -40,7 +40,7 @@ export const createGenre = async (
 
 export const getGenres = async (req: Request, res: Response): Promise<void> => {
   try {
-    const genres = await Genre.find();
+    const genres = await Genre.find().populate("songCount");
     res.status(200).json({ success: true, data: { genres } });
   } catch (error: any) {
     res.status(500).json({
